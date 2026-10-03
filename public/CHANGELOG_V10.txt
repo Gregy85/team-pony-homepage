@@ -1,0 +1,13 @@
+TEAM PONY HOMEPAGE V10
+
+Änderungen gegenüber V9:
+- Altersangabe im Bereich „Was uns ausmacht“ von „Ab 2 Jahren“ auf „2 bis 9 Jahre“ geändert.
+- Erklärung dazu auf die gesamte Angebotsspanne 2–9 Jahre angepasst.
+- Versionsstände in Homepage, Rechtstexten und Runtime-Konfiguration auf V10 gesetzt.
+
+Bereits aus V9 enthalten:
+- Eltern-Kind-Workshops nur 1,5 h / 22,50 € pro Kind.
+- Mini-Kurs als aufeinander aufbauender Einstieg für Beginner / Kinder mit wenig oder keiner Pony-Erfahrung.
+- Bild „Mit dem Pony fit für die Schule“ mobil vollständig sichtbar.
+- Zentrale Standortdaten über Supabase vorbereitet und auf sichtbare Standortangaben / Rechtstexte angewendet.
+- Homepage-Angebote und Anfragen über Supabase vorbereitet.

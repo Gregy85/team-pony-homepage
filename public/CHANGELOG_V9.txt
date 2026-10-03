@@ -1,0 +1,22 @@
+TEAM PONY HOMEPAGE V9 – Änderungen
+
+- Bild "Mit dem Pony fit für die Schule" so angepasst, dass Kind und Pony auf Mobilgeräten nicht mehr durch object-fit:cover abgeschnitten werden.
+- Eltern-Kind-Workshops: nur 1,5 Stunden / 22,50 EUR pro Kind.
+- Mini-Kurse: Beschreibung auf Beginner / wenig bis keine Pony-Erfahrung umgestellt; 10er-Blöcke bauen aufeinander auf; Wechsel zu Maxi nach Entwicklung/Erfahrung.
+- Zentrale Standortkonfiguration vorbereitet. Standort wird im Onlinebetrieb aus Supabase geladen; lokale Standardwerte stehen in site-config.js.
+- Kontakt, Footer, Impressum und weitere sichtbare Standortangaben werden aus dieser zentralen Einstellung aktualisiert.
+- Supabase-Verbindung zur Team-Pony-App-Datenbasis vorbereitet und aktiviert:
+  * veröffentlichte Homepage-Angebote werden aus homepage_offers geladen
+  * Homepage-Anfragen werden in external_inquiries gespeichert
+  * Standort in site_settings
+  * Kursblöcke / Kursteilnahmen für 10er-Block-Logik
+  * Folgehinweis ab Termin 8 von 10 vorbereitet
+  * Social-Media-Vorlagen-Tabelle vorbereitet
+- Oktober-Workshops 2026 in Supabase als veröffentlichte Angebote hinterlegt.
+- Rechtstexte an die aktuelle Supabase-Anfragefunktion angepasst.
+- Homepage-Version auf V9 gesetzt.
+
+Noch separat nötig, sobald entsprechende Zugangsdaten/Dateien vorhanden sind:
+- automatischer E-Mail-Versand an Sabrina/Kunden benötigt einen Mail-Dienst bzw. dessen Zugang.
+- Facebook-/Instagram-Veröffentlichung benötigt die jeweiligen Kontoverbindungen/API-Berechtigungen.
+- App-Oberfläche zum Bearbeiten von site_settings/Kurslogik benötigt den aktuellen App-Quellstand, falls diese Felder direkt in der App bedienbar werden sollen.
