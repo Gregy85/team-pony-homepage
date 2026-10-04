@@ -296,7 +296,7 @@ function renderDynamicCourses(offers = []) {
       const icon = level === 'maxi' ? '🐴' : '🌼';
       const tag = o.age_text || (level === 'maxi' ? 'Maxi' : level === 'mini' ? 'Mini / Beginner' : 'Kurs');
       const chips = [];
-      if (o.block_size) chips.push(`${o.block_size}er-Block`);
+      if (o.block_size) chips.push(`${o.block_size} Termine`);
       if (o.free_spots != null) chips.push(`${o.free_spots} ${Number(o.free_spots) === 1 ? 'freier Platz' : 'freie Plätze'}`);
       if (o.status) chips.push(String(o.status).replaceAll('_',' '));
       if (o.date) chips.push(formatPublicDate(o.date));
