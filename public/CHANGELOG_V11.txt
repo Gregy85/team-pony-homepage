@@ -1,0 +1,5 @@
+Team Pony Homepage V11
+- Cloudflare/Supabase-Verbindung bleibt bestehen
+- Facebook- und Instagram-Links im Kontaktbereich ergänzt
+- Standort, Kontakt und veröffentlichte Angebote werden weiterhin aus Supabase geladen
+- Bereit für die erweiterten TPS-Manager-v81-Angebotsfelder
