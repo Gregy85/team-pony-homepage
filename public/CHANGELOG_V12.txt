@@ -1,0 +1,5 @@
+Team Pony Homepage V12
+- Manuell im TPS Manager angelegte Kurse werden automatisch im gleichen Karten-Design wie bestehende Mini-/Maxi-Kurse dargestellt.
+- Kursangebote werden nicht mehr versehentlich als Workshop-Termine gerendert.
+- Aktuelle Kurse werden automatisch als Auswahl im Anfrageformular ergänzt.
+- Freie Plätze, Kursstatus, Blockgröße, Datum und Preis werden aus Supabase übernommen.
