@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#84b81f" />
   <title>Team Pony Schule Freudenstadt</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive" />
   <meta name="description" content="Tiererlebnispädagogische Angebote mit Ponys in Freudenstadt: Mini- und Maxi-Kurse, Workshops, Familienzeit, Kindergeburtstage und Frühförderung." />
   <link rel="icon" href="assets/team-pony-schule-freudenstadt.jpg" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=13" />
 </head>
-<body>
+<body class="homepage-test-mode">
+  <div class="test-version-banner" role="status">
+    <strong>TESTVERSION</strong>
+    <span>Diese Homepage befindet sich noch im Aufbau. Öffentliche Buchungen sind noch nicht freigegeben.</span>
+  </div>
   <header class="site-header" id="top">
     <div class="container nav-wrap">
       <a class="brand" href="#top" aria-label="Startseite Team Pony Schule Freudenstadt">
@@ -126,7 +132,7 @@
       <div class="container">
         <div class="section-heading">
           <div><div class="section-kicker">Unsere Angebote</div><h2>Für kleine Ponyfreunde und große Erlebnisse.</h2></div>
-          <p>Die Termine und freien Plätze werden später automatisch aus der App eingeblendet. Die aktuellen Grundpreise findest du direkt bei den Angeboten und in der Preisübersicht.</p>
+          <p>Die Termine und freien Plätze werden automatisch aus dem TPS Manager eingeblendet. Die aktuellen Grundpreise findest du direkt bei den Angeboten und in der Preisübersicht.</p>
         </div>
         <div class="cards">
           <article class="offer-card course-card">
@@ -202,7 +208,7 @@
       <div class="container">
         <div class="section-heading">
           <div><div class="section-kicker">Preise</div><h2>Unsere Preise auf einen Blick.</h2></div>
-          <p>Klare Preise für Kurse, Workshops und individuelle Ponyzeit. Aktuelle Termine und freie Plätze erscheinen später automatisch aus der App.</p>
+          <p>Klare Preise für Kurse, Workshops und individuelle Ponyzeit. Aktuelle Termine und freie Plätze erscheinen automatisch aus dem TPS Manager.</p>
         </div>
 
         <div class="pricing-grid">
@@ -276,7 +282,7 @@
         </div>
         <div class="course-note">
           <span>💡</span>
-          <div><strong>Freie Plätze werden aktuell angezeigt.</strong><p>Später zeigt die Homepage direkt aus der App, ob ein Kurs noch auf den Start wartet, bereits läuft, ein Einstieg möglich ist oder der Kurs ausgebucht ist.</p></div>
+          <div><strong>Freie Plätze werden aktuell angezeigt.</strong><p>Die Homepage zeigt direkt aus der App, ob ein Kurs noch auf den Start wartet, bereits läuft, ein Einstieg möglich ist oder der Kurs ausgebucht ist.</p></div>
         </div>
       </div>
     </section>
@@ -371,7 +377,13 @@
           </div>
           <div class="mail-hint"><strong>Später automatisch:</strong><br />Buchung in der App + E-Mail an Sabrina + Bestätigung an die Eltern.</div>
         </div>
-        <form class="inquiry-form" id="inquiryForm">
+        <div class="test-unlock" id="testUnlockBox">
+          <span class="test-unlock-badge">TESTMODUS</span>
+          <div><strong>Testanfrage freischalten</strong><p>Nur Gregory und Sabrina sollen im Moment Anfragen testen. Gib dafür den Testcode aus dem TPS Manager ein.</p></div>
+          <div class="test-unlock-row"><input id="testAccessCode" inputmode="numeric" autocomplete="off" placeholder="Testcode" maxlength="8"/><button class="btn secondary" id="testUnlockButton" type="button">Freischalten</button></div>
+          <p class="test-unlock-status" id="testUnlockStatus">Anfrageformular ist gesperrt.</p>
+        </div>
+        <form class="inquiry-form is-test-locked" id="inquiryForm">
           <label class="hp-field" aria-hidden="true">Bitte leer lassen<input name="website" tabindex="-1" autocomplete="off" /></label>
           <div class="form-row">
             <label>Ihr Name<input name="name" required placeholder="Vor- und Nachname" /></label>
@@ -410,16 +422,16 @@
   <footer class="footer" id="kontakt">
     <div class="container footer-grid footer-grid-legal">
       <div class="footer-brand"><img src="assets/team-pony-schule-freudenstadt.jpg" alt="Logo Team Pony Schule Freudenstadt" /><div><strong data-site-location-name>Team Pony Schule Freudenstadt</strong><small>Tiererlebnispädagogische Angebote mit Ponys</small></div></div>
-      <div><strong>Kontakt</strong><a href="mailto:sabrinaheidenwag@freenet.de">sabrinaheidenwag@freenet.de</a><a href="tel:+4915231732865">01523 1732865</a></div>
+      <div><strong>Kontakt</strong><a href="mailto:sabrinaheidenwag@freenet.de">sabrinaheidenwag@freenet.de</a><a href="tel:+4915231732865">01523 1732865</a><div class="social-links"><a href="https://www.facebook.com/share/1Dtuxm46pn/" target="_blank" rel="noopener">Facebook</a><a href="https://www.instagram.com/teamponyschulefreudenstadt" target="_blank" rel="noopener">Instagram</a></div></div>
       <div><strong>Adresse</strong><span data-site-street>Eichwaldweg 30</span><span><span data-site-postal>72250</span> <span data-site-city>Freudenstadt</span></span></div>
       <div><strong>Rechtliches</strong><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="teilnahmebedingungen.html">Teilnahme- & Buchungsbedingungen</a><a href="bildnachweise-ki.html">Bildnachweise & KI-Hinweise</a></div>
       <div class="concept-logo"><img src="assets/team-pony-concept.jpg" alt="Team Pony Concept" /></div>
     </div>
-    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage Entwurf V10</span></div>
+    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage V13 · TESTVERSION</span></div>
   </footer>
 
-  <script src="site-config.js"></script>
-  <script src="site-runtime.js"></script>
-  <script src="script.js"></script>
+  <script src="site-config.js?v=13"></script>
+  <script src="site-runtime.js?v=13"></script>
+  <script src="script.js?v=13"></script>
 </body>
 </html>
