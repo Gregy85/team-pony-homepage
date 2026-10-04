@@ -57,3 +57,11 @@
   .fit-photo img{height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center;border-radius:22px}
   .single-price{max-width:none}
 }
+
+.social-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.social-links a{display:inline-flex;align-items:center;justify-content:center;padding:7px 11px;border:1px solid #dce8d2;border-radius:999px;background:#f6faef;color:var(--green-deep);font-weight:850;font-size:12px}.social-links a:hover{background:#edf6df}
+
+
+/* V13 – Testbetrieb */
+.test-version-banner{position:sticky;top:0;z-index:1000;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 16px;background:#fff2bd;border-bottom:1px solid #e9c45f;color:#5d4700;text-align:center;font-size:13px}.test-version-banner strong{display:inline-flex;background:#eaa700;color:#fff;border-radius:999px;padding:4px 9px;font-size:11px;letter-spacing:.05em}.test-version-banner span{font-weight:700}
+.test-unlock{display:grid;gap:9px;margin:0 0 18px;padding:15px;border:1px solid #eccf78;border-radius:16px;background:#fff9df}.test-unlock-badge{justify-self:start;display:inline-flex;background:#eba900;color:#fff;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900;letter-spacing:.05em}.test-unlock strong{font-size:18px}.test-unlock p{margin:4px 0 0}.test-unlock-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.test-unlock-row input{min-width:0}.test-unlock-status{font-weight:800;color:#6d580f}.inquiry-form.is-test-locked{opacity:.58;filter:saturate(.72)}.inquiry-form.is-test-locked::before{content:'Testcode erforderlich';display:block;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:#f4f5f5;color:#69767d;font-weight:800;text-align:center}
+@media(max-width:600px){.test-version-banner{font-size:12px}.test-unlock-row{grid-template-columns:1fr}.test-unlock-row .btn{width:100%}}
