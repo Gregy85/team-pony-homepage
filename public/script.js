@@ -13,6 +13,46 @@ if (menuBtn && nav) {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+const TPS_HOMEPAGE_TEST_MODE = true;
+const TPS_HOMEPAGE_TEST_CODE = '4826';
+let tpsTestUnlocked = sessionStorage.getItem('tps_homepage_test_unlocked') === '1';
+
+function applyHomepageTestLock() {
+  const form = document.getElementById('inquiryForm');
+  const status = document.getElementById('testUnlockStatus');
+  if (!form || !TPS_HOMEPAGE_TEST_MODE) return;
+  form.classList.toggle('is-test-locked', !tpsTestUnlocked);
+  form.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el => {
+    if (el.name === 'website') return;
+    el.disabled = !tpsTestUnlocked;
+  });
+  if (status) status.textContent = tpsTestUnlocked
+    ? 'Testmodus freigeschaltet – Testanfragen werden deutlich als TEST markiert.'
+    : 'Anfrageformular ist gesperrt.';
+}
+
+function unlockHomepageTestMode() {
+  const input = document.getElementById('testAccessCode');
+  const status = document.getElementById('testUnlockStatus');
+  if (String(input?.value || '').trim() === TPS_HOMEPAGE_TEST_CODE) {
+    tpsTestUnlocked = true;
+    sessionStorage.setItem('tps_homepage_test_unlocked','1');
+    if (input) input.value = '';
+    applyHomepageTestLock();
+  } else if (status) {
+    status.textContent = 'Testcode ist nicht korrekt.';
+  }
+}
+
+document.getElementById('testUnlockButton')?.addEventListener('click', unlockHomepageTestMode);
+document.getElementById('testAccessCode')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); unlockHomepageTestMode(); } });
+applyHomepageTestLock();
+
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 let workshops = [
   {
     id: '2026-09-19-herbstzauber', monthGroup: 'September 2026', date: '2026-09-19', day: '19', month: 'SEP', weekday: 'Samstag',
@@ -167,10 +207,16 @@ const form = document.getElementById('inquiryForm');
 if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (TPS_HOMEPAGE_TEST_MODE && !tpsTestUnlocked) {
+      document.getElementById('testUnlockBox')?.scrollIntoView({behavior:'smooth',block:'center'});
+      const lockedStatus = document.getElementById('testUnlockStatus');
+      if (lockedStatus) lockedStatus.textContent = 'Bitte zuerst den Testcode eingeben.';
+      return;
+    }
     const d = new FormData(form);
     const submitButton = form.querySelector('button[type="submit"]');
     const statusEl = document.getElementById('formStatus');
-    const subject = `Anfrage Team Pony Schule – ${d.get('offer')}`;
+    const subject = `${TPS_HOMEPAGE_TEST_MODE ? '[TEST] ' : ''}Anfrage Team Pony Schule – ${d.get('offer')}`;
     const body = [
       'Hallo Sabrina,',
       '',
@@ -195,6 +241,7 @@ if (form) {
     if (statusEl) statusEl.textContent = 'Anfrage wird übermittelt …';
 
     const messageWithChild = [
+      TPS_HOMEPAGE_TEST_MODE ? '[TESTANFRAGE] Nur Test – nicht als echte Buchung/Einnahme verbuchen.' : '',
       d.get('child') ? `Kind: ${d.get('child')}` : '',
       d.get('age') ? `Alter: ${d.get('age')}` : '',
       d.get('message') || ''
@@ -206,14 +253,14 @@ if (form) {
         p_customer_name: String(d.get('name') || ''),
         p_email: String(d.get('email') || ''),
         p_phone: String(d.get('phone') || ''),
-        p_service: String(d.get('offer') || 'Allgemeine Anfrage'),
+        p_service: `${TPS_HOMEPAGE_TEST_MODE ? '[TEST] ' : ''}${String(d.get('offer') || 'Allgemeine Anfrage')}`,
         p_message: messageWithChild,
         p_child_count: d.get('child_count') ? Number(d.get('child_count')) : null,
         p_requested_date: d.get('requested_date') || null,
         p_requested_time: String(d.get('requested_time') || ''),
         p_honeypot: String(d.get('website') || '')
       });
-      if (statusEl) statusEl.textContent = 'Danke! Die Anfrage wurde gespeichert und erscheint in der Team-Pony-Datenbank.';
+      if (statusEl) statusEl.textContent = TPS_HOMEPAGE_TEST_MODE ? 'Testanfrage gespeichert. Sie erscheint im TPS Manager deutlich als TEST.' : 'Danke! Die Anfrage wurde gespeichert und erscheint in der Team-Pony-Datenbank.';
       form.reset();
     } catch (err) {
       if (statusEl) statusEl.textContent = 'Die Online-Übertragung war nicht möglich. Es wird stattdessen eine E-Mail vorbereitet.';
@@ -223,6 +270,67 @@ if (form) {
       if (submitButton) submitButton.disabled = false;
     }
   });
+}
+
+function isCourseOffer(o) {
+  const type = String(o?.offer_type || '').toLowerCase();
+  const level = String(o?.course_level || '').toLowerCase();
+  return type.includes('kurs') || level === 'mini' || level === 'maxi';
+}
+
+function formatPublicDate(v) {
+  if (!v) return '';
+  const [y,m,d] = String(v).split('-');
+  return y && m && d ? `${d}.${m}.${y}` : String(v);
+}
+
+function renderDynamicCourses(offers = []) {
+  const cards = document.querySelector('#angebote .cards');
+  if (!cards) return;
+  cards.querySelectorAll('.dynamic-course-card').forEach(el => el.remove());
+  const anchor = [...cards.children].find(el => el.classList?.contains('offer-card') && !el.classList.contains('course-card')) || null;
+  offers.filter(isCourseOffer)
+    .filter(o => !['abgesagt','beendet'].includes(String(o.status || '').toLowerCase()))
+    .forEach(o => {
+      const level = String(o.course_level || '').toLowerCase();
+      const icon = level === 'maxi' ? '🐴' : '🌼';
+      const tag = o.age_text || (level === 'maxi' ? 'Maxi' : level === 'mini' ? 'Mini / Beginner' : 'Kurs');
+      const chips = [];
+      if (o.block_size) chips.push(`${o.block_size}er-Block`);
+      if (o.free_spots != null) chips.push(`${o.free_spots} ${Number(o.free_spots) === 1 ? 'freier Platz' : 'freie Plätze'}`);
+      if (o.status) chips.push(String(o.status).replaceAll('_',' '));
+      if (o.date) chips.push(formatPublicDate(o.date));
+      const price = o.price != null && o.price !== '' ? `${Number(o.price).toLocaleString('de-DE',{minimumFractionDigits:Number(o.price)%1?2:0,maximumFractionDigits:2})} €` : '';
+      const article = document.createElement('article');
+      article.className = 'offer-card course-card dynamic-course-card';
+      article.innerHTML = `
+        <div class="offer-top"><div class="offer-icon">${icon}</div><span class="tag">${escapeHtml(tag)}</span></div>
+        <h3>${escapeHtml(o.name || 'Kurs')}</h3>
+        <p>${escapeHtml(o.description || 'Fortlaufender Ponykurs in einer kleinen Gruppe.')}</p>
+        ${chips.length ? `<div class="chips">${chips.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>` : ''}
+        ${price ? `<div class="offer-price"><strong>${price}</strong><span>${o.block_size ? `pro Kind · ${escapeHtml(o.block_size)} Termine` : 'pro Kind'}</span></div>` : ''}
+        <a href="#anfrage" class="dynamic-course-request" data-course-id="${escapeHtml(o.id)}" data-course-name="${escapeHtml(o.name || 'Kurs')}">Kurs anfragen →</a>`;
+      cards.insertBefore(article, anchor);
+    });
+}
+
+function addDynamicCourseOptions(offers = []) {
+  if (!offerSelect) return;
+  offerSelect.querySelectorAll('optgroup[data-dynamic-courses="1"]').forEach(g => g.remove());
+  const current = offers.filter(isCourseOffer).filter(o => !['abgesagt','beendet'].includes(String(o.status || '').toLowerCase()));
+  if (!current.length) return;
+  const group = document.createElement('optgroup');
+  group.label = 'Aktuelle Kurse';
+  group.dataset.dynamicCourses = '1';
+  current.forEach(o => {
+    const option = document.createElement('option');
+    const date = o.date ? ` – ${formatPublicDate(o.date)}` : '';
+    option.value = `${o.name}${date}`;
+    option.textContent = `${o.name}${date}`;
+    option.dataset.courseId = o.id;
+    group.appendChild(option);
+  });
+  offerSelect.appendChild(group);
 }
 
 function publicOfferToWorkshop(o) {
@@ -246,9 +354,26 @@ function publicOfferToWorkshop(o) {
 }
 
 window.addEventListener('tps-public-data-ready', (e) => {
-  const live = (e.detail?.offers || []).map(publicOfferToWorkshop).filter(Boolean);
-  if (!live.length) return; // feste Termine bleiben als Fallback, bis die App Angebote veröffentlicht
-  workshops = live;
-  renderWorkshops();
-  addWorkshopOptions();
+  const offers = e.detail?.offers || [];
+  const courseOffers = offers.filter(isCourseOffer);
+  const live = offers.filter(o => !isCourseOffer(o)).map(publicOfferToWorkshop).filter(Boolean);
+
+  // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
+  renderDynamicCourses(courseOffers);
+  addDynamicCourseOptions(courseOffers);
+
+  // Nur Nicht-Kurse ersetzen die festen Workshop-Termine. Dadurch landet ein Kurs nie im Workshop-Layout.
+  if (live.length) {
+    workshops = live;
+    renderWorkshops();
+    addWorkshopOptions();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('.dynamic-course-request');
+  if (!a) return;
+  const name = a.dataset.courseName || 'Kurs';
+  const option = offerSelect ? [...offerSelect.options].find(o => o.dataset.courseId === a.dataset.courseId) : null;
+  prepareOffer(option?.value || name, `Ich interessiere mich für den Kurs „${name}“.`);
 });
