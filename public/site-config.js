@@ -1,5 +1,5 @@
 window.TPS_SITE_CONFIG = {
-  version: 10,
+  version: 13,
   workspaceId: "0b6a2ea9-c30b-40b0-bd1e-3eb1f5358e08",
   supabaseUrl: "https://vljbatzgfnlotpfnnlco.supabase.co",
   supabasePublishableKey: "sb_publishable_IODOjr3bcQNRwZcWN5y3RA_UVmZCugB",
