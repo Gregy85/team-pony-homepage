@@ -144,6 +144,28 @@ renderWorkshops();
 
 const offerSelect = document.getElementById('offerSelect');
 const messageField = document.querySelector('#inquiryForm textarea[name="message"]');
+const requestedDateLabel = document.getElementById('requestedDateLabel');
+const fixedOfferSchedule = document.getElementById('fixedOfferSchedule');
+
+function selectedOfferOption() {
+  return offerSelect?.selectedOptions?.[0] || null;
+}
+function updateInquiryScheduleFields() {
+  const option = selectedOfferOption();
+  const fixedDate = option?.dataset?.fixedDate || '';
+  const fixedTime = option?.dataset?.fixedTime || '';
+  const hasFixed = !!fixedDate;
+  if (requestedDateLabel) requestedDateLabel.hidden = hasFixed;
+  const dateInput = document.querySelector('#inquiryForm input[name="requested_date"]');
+  if (dateInput && hasFixed) dateInput.value = '';
+  if (fixedOfferSchedule) {
+    fixedOfferSchedule.hidden = !hasFixed;
+    fixedOfferSchedule.textContent = hasFixed
+      ? ('Fester Termin: ' + fixedDate.split('-').reverse().join('.') + (fixedTime ? ' · ' + fixedTime : ''))
+      : '';
+  }
+}
+offerSelect?.addEventListener('change', updateInquiryScheduleFields);
 
 function formatWorkshopDate(w) {
   const [, month, day] = w.date.split('-');
@@ -167,11 +189,14 @@ function addWorkshopOptions() {
     option.value = workshopOfferLabel(w);
     option.textContent = workshopOfferLabel(w);
     option.dataset.workshopId = w.id;
+    option.dataset.fixedDate = w.date || '';
+    option.dataset.fixedTime = w.time || '';
     group.appendChild(option);
   });
   offerSelect.appendChild(group);
 }
 addWorkshopOptions();
+updateInquiryScheduleFields();
 
 function prepareOffer(wanted, details = '') {
   if (offerSelect) {
@@ -186,6 +211,7 @@ function prepareOffer(wanted, details = '') {
     }
   }
   if (messageField && details) messageField.value = details;
+  updateInquiryScheduleFields();
   document.getElementById('anfrage')?.scrollIntoView({behavior:'smooth'});
 }
 
@@ -226,8 +252,8 @@ if (form) {
       `Kind: ${d.get('child') || ''}`,
       `Alter: ${d.get('age') || ''}`,
       `Anzahl Kinder: ${d.get('child_count') || ''}`,
-      `Wunschdatum: ${d.get('requested_date') || ''}`,
-      `Wunschzeit: ${d.get('requested_time') || ''}`,
+      `Termin/Datum: ${(selectedOfferOption()?.dataset?.fixedDate || d.get('requested_date') || '')}`,
+      `Uhrzeit: ${(selectedOfferOption()?.dataset?.fixedTime || '')}`,
       `Telefon: ${d.get('phone') || ''}`,
       `E-Mail: ${d.get('email') || ''}`,
       '',
@@ -256,12 +282,13 @@ if (form) {
         p_service: `${TPS_HOMEPAGE_TEST_MODE ? '[TEST] ' : ''}${String(d.get('offer') || 'Allgemeine Anfrage')}`,
         p_message: messageWithChild,
         p_child_count: d.get('child_count') ? Number(d.get('child_count')) : null,
-        p_requested_date: d.get('requested_date') || null,
-        p_requested_time: String(d.get('requested_time') || ''),
+        p_requested_date: selectedOfferOption()?.dataset?.fixedDate || d.get('requested_date') || null,
+        p_requested_time: String(selectedOfferOption()?.dataset?.fixedTime || ''),
         p_honeypot: String(d.get('website') || '')
       });
       if (statusEl) statusEl.textContent = TPS_HOMEPAGE_TEST_MODE ? 'Testanfrage gespeichert. Sie erscheint im TPS Manager deutlich als TEST.' : 'Danke! Die Anfrage wurde gespeichert und erscheint in der Team-Pony-Datenbank.';
       form.reset();
+      updateInquiryScheduleFields();
     } catch (err) {
       if (statusEl) statusEl.textContent = 'Die Online-Übertragung war nicht möglich. Es wird stattdessen eine E-Mail vorbereitet.';
       const email = window.TPS_SITE?.email || 'sabrinaheidenwag@freenet.de';
@@ -328,6 +355,8 @@ function addDynamicCourseOptions(offers = []) {
     option.value = `${o.name}${date}`;
     option.textContent = `${o.name}${date}`;
     option.dataset.courseId = o.id;
+    option.dataset.fixedDate = o.date || '';
+    option.dataset.fixedTime = o.time ? String(o.time).slice(0,5) + ' Uhr' : '';
     group.appendChild(option);
   });
   offerSelect.appendChild(group);
@@ -361,6 +390,7 @@ window.addEventListener('tps-public-data-ready', (e) => {
   // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
   renderDynamicCourses(courseOffers);
   addDynamicCourseOptions(courseOffers);
+  updateInquiryScheduleFields();
 
   // Nur Nicht-Kurse ersetzen die festen Workshop-Termine. Dadurch landet ein Kurs nie im Workshop-Layout.
   if (live.length) {
