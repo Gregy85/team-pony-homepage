@@ -9,7 +9,7 @@
   <meta name="googlebot" content="noindex, nofollow, noarchive" />
   <meta name="description" content="Tiererlebnispädagogische Angebote mit Ponys in Freudenstadt: Mini- und Maxi-Kurse, Workshops, Familienzeit, Kindergeburtstage und Frühförderung." />
   <link rel="icon" href="assets/team-pony-schule-freudenstadt.jpg" />
-  <link rel="stylesheet" href="styles.css?v=13" />
+  <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body class="homepage-test-mode">
   <div class="test-version-banner" role="status">
@@ -394,10 +394,8 @@
             <label>Telefon<input name="phone" type="tel" placeholder="für Rückfragen" /></label>
           </div>
           <label>E-Mail<input type="email" name="email" required placeholder="name@beispiel.de" /></label>
-          <div class="form-row">
-            <label>Wunschdatum<input type="date" name="requested_date" /></label>
-            <label>Wunschzeit<input name="requested_time" placeholder="z. B. 15:00 Uhr" /></label>
-          </div>
+          <div class="fixed-offer-schedule" id="fixedOfferSchedule" hidden></div>
+          <label id="requestedDateLabel">Wunschdatum<input type="date" name="requested_date" /></label>
           <label>Anzahl Kinder<input name="child_count" type="number" min="1" max="30" inputmode="numeric" placeholder="z. B. 1" /></label>
           <label>Angebot<select name="offer" id="offerSelect">
             <option>Allgemeine Anfrage</option>
@@ -411,7 +409,7 @@
             <option>Kindergarten / Schule</option>
             <option>Gutschein</option>
           </select><small class="field-hint">Wenn du bei einem Workshop auf „Workshop anfragen“ klickst, wird hier automatisch der richtige Workshop mit Datum und Uhrzeit ausgewählt.</small></label>
-          <label>Nachricht<textarea name="message" rows="4" placeholder="Worum geht es? Wunschdatum, Fragen, Besonderheiten …"></textarea></label>
+          <label>Nachricht<textarea name="message" rows="4" placeholder="Worum geht es? Fragen, Besonderheiten …"></textarea></label>
           <button class="btn primary wide" type="submit">Anfrage senden</button>
           <p class="form-note" id="formStatus">Die Anfrage wird in der Team-Pony-Datenbank gespeichert. Falls die Online-Verbindung nicht verfügbar ist, wird als Fallback eine E-Mail vorbereitet.</p>
         </form>
@@ -427,11 +425,11 @@
       <div><strong>Rechtliches</strong><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="teilnahmebedingungen.html">Teilnahme- & Buchungsbedingungen</a><a href="bildnachweise-ki.html">Bildnachweise & KI-Hinweise</a></div>
       <div class="concept-logo"><img src="assets/team-pony-concept.jpg" alt="Team Pony Concept" /></div>
     </div>
-    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage V13 · TESTVERSION</span></div>
+    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage V14 · TESTVERSION</span></div>
   </footer>
 
-  <script src="site-config.js?v=13"></script>
-  <script src="site-runtime.js?v=13"></script>
-  <script src="script.js?v=13"></script>
+  <script src="site-config.js?v=14"></script>
+  <script src="site-runtime.js?v=14"></script>
+  <script src="script.js?v=14"></script>
 </body>
 </html>
