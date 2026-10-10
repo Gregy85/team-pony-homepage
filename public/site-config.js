@@ -1,5 +1,5 @@
 window.TPS_SITE_CONFIG = {
-  version: 13,
+  version: 15,
   workspaceId: "0b6a2ea9-c30b-40b0-bd1e-3eb1f5358e08",
   supabaseUrl: "https://vljbatzgfnlotpfnnlco.supabase.co",
   supabasePublishableKey: "sb_publishable_IODOjr3bcQNRwZcWN5y3RA_UVmZCugB",
@@ -11,7 +11,7 @@ window.TPS_SITE_CONFIG = {
     city: "Freudenstadt",
     country: "Deutschland",
     phone: "01523 1732865",
-    email: "sabrinaheidenwag@freenet.de",
+    email: "info@team-pony-schule-freudenstadt.de",
     directions_note: ""
   }
 };
