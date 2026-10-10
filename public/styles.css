@@ -70,3 +70,11 @@
 /* V14: Bei Angeboten mit festem Termin nur den Termin anzeigen. */
 .fixed-offer-schedule{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--soft);font-weight:800;color:var(--green-deep)}
 .fixed-offer-schedule[hidden],#requestedDateLabel[hidden]{display:none!important}
+
+/* V15 – optionale Angebotsfotos & mehrere Kinder */
+.workshop-photos,.dynamic-offer-photos{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px}
+.workshop-photos.two,.dynamic-offer-photos.two{grid-template-columns:1fr 1fr}
+.workshop-photos img,.dynamic-offer-photos img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;border:1px solid var(--line)}
+.child-name-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:15px}
+.child-name-fields label{margin-bottom:0}
+@media(max-width:640px){.child-name-fields,.workshop-photos.two,.dynamic-offer-photos.two{grid-template-columns:1fr}}
