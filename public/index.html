@@ -9,7 +9,7 @@
   <meta name="googlebot" content="noindex, nofollow, noarchive" />
   <meta name="description" content="Tiererlebnispädagogische Angebote mit Ponys in Freudenstadt: Mini- und Maxi-Kurse, Workshops, Familienzeit, Kindergeburtstage und Frühförderung." />
   <link rel="icon" href="assets/team-pony-schule-freudenstadt.jpg" />
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body class="homepage-test-mode">
   <div class="test-version-banner" role="status">
@@ -369,13 +369,13 @@
         <div>
           <div class="section-kicker">Kontakt & Anfrage</div>
           <h2>Welches Angebot passt zu euch?</h2>
-          <p class="lead">Schreibt uns kurz, wofür ihr euch interessiert. Bis die echte Online-Buchung angebunden ist, bereitet dieses Formular eine E-Mail mit allen Angaben vor.</p>
+          <p class="lead">Schreibt uns kurz, wofür ihr euch interessiert. Eure Anfrage wird direkt an den TPS Manager übermittelt.</p>
           <div class="contact-list">
             <a href="tel:+4915231732865">📞 01523 1732865</a>
-            <a href="mailto:sabrinaheidenwag@freenet.de">✉️ sabrinaheidenwag@freenet.de</a>
+            <a href="mailto:info@team-pony-schule-freudenstadt.de">✉️ info@team-pony-schule-freudenstadt.de</a>
             <span>📍 <span data-site-address-inline>Eichwaldweg 30, 72250 Freudenstadt</span></span>
           </div>
-          <div class="mail-hint"><strong>Später automatisch:</strong><br />Buchung in der App + E-Mail an Sabrina + Bestätigung an die Eltern.</div>
+          
         </div>
         <div class="test-unlock" id="testUnlockBox">
           <span class="test-unlock-badge">TESTMODUS</span>
@@ -387,16 +387,16 @@
           <label class="hp-field" aria-hidden="true">Bitte leer lassen<input name="website" tabindex="-1" autocomplete="off" /></label>
           <div class="form-row">
             <label>Ihr Name<input name="name" required placeholder="Vor- und Nachname" /></label>
-            <label>Name des Kindes<input name="child" placeholder="Vorname" /></label>
+            <label>Telefon<input name="phone" type="tel" placeholder="für Rückfragen" /></label>
           </div>
           <div class="form-row">
             <label>Alter des Kindes<input name="age" inputmode="numeric" placeholder="z. B. 6" /></label>
-            <label>Telefon<input name="phone" type="tel" placeholder="für Rückfragen" /></label>
+            <label>Anzahl Kinder<input id="childCountInput" name="child_count" type="number" min="1" max="30" inputmode="numeric" value="1" /></label>
           </div>
+          <div id="childNameFields" class="child-name-fields"></div>
           <label>E-Mail<input type="email" name="email" required placeholder="name@beispiel.de" /></label>
           <div class="fixed-offer-schedule" id="fixedOfferSchedule" hidden></div>
           <label id="requestedDateLabel">Wunschdatum<input type="date" name="requested_date" /></label>
-          <label>Anzahl Kinder<input name="child_count" type="number" min="1" max="30" inputmode="numeric" placeholder="z. B. 1" /></label>
           <label>Angebot<select name="offer" id="offerSelect">
             <option>Allgemeine Anfrage</option>
             <option>Mini-Kurs</option>
@@ -420,16 +420,16 @@
   <footer class="footer" id="kontakt">
     <div class="container footer-grid footer-grid-legal">
       <div class="footer-brand"><img src="assets/team-pony-schule-freudenstadt.jpg" alt="Logo Team Pony Schule Freudenstadt" /><div><strong data-site-location-name>Team Pony Schule Freudenstadt</strong><small>Tiererlebnispädagogische Angebote mit Ponys</small></div></div>
-      <div><strong>Kontakt</strong><a href="mailto:sabrinaheidenwag@freenet.de">sabrinaheidenwag@freenet.de</a><a href="tel:+4915231732865">01523 1732865</a><div class="social-links"><a href="https://www.facebook.com/share/1Dtuxm46pn/" target="_blank" rel="noopener">Facebook</a><a href="https://www.instagram.com/teamponyschulefreudenstadt" target="_blank" rel="noopener">Instagram</a></div></div>
+      <div><strong>Kontakt</strong><a href="mailto:info@team-pony-schule-freudenstadt.de">info@team-pony-schule-freudenstadt.de</a><a href="tel:+4915231732865">01523 1732865</a><div class="social-links"><a href="https://www.facebook.com/share/1Dtuxm46pn/" target="_blank" rel="noopener">Facebook</a><a href="https://www.instagram.com/teamponyschulefreudenstadt" target="_blank" rel="noopener">Instagram</a></div></div>
       <div><strong>Adresse</strong><span data-site-street>Eichwaldweg 30</span><span><span data-site-postal>72250</span> <span data-site-city>Freudenstadt</span></span></div>
       <div><strong>Rechtliches</strong><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="teilnahmebedingungen.html">Teilnahme- & Buchungsbedingungen</a><a href="bildnachweise-ki.html">Bildnachweise & KI-Hinweise</a></div>
       <div class="concept-logo"><img src="assets/team-pony-concept.jpg" alt="Team Pony Concept" /></div>
     </div>
-    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage V14 · TESTVERSION</span></div>
+    <div class="container footer-bottom"><span>© <span id="year"></span> <span data-site-location-name>Team Pony Schule Freudenstadt</span></span><span>Homepage V15 · TESTVERSION</span></div>
   </footer>
 
-  <script src="site-config.js?v=14"></script>
-  <script src="site-runtime.js?v=14"></script>
-  <script src="script.js?v=14"></script>
+  <script src="site-config.js?v=15"></script>
+  <script src="site-runtime.js?v=15"></script>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
