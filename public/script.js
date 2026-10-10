@@ -416,10 +416,26 @@ function publicOfferToWorkshop(o) {
   };
 }
 
+function applyBirthdayPriceOverride(offers = []) {
+  const birthday = offers.find(o => /kindergeburtstag/i.test(String(o?.offer_type||o?.name||'')));
+  if (!birthday || birthday.price == null || birthday.price === '') return;
+  const low = Number(birthday.price);
+  const high = Number(birthday.social_payload?.birthday_price_high ?? 70);
+  const cards = [...document.querySelectorAll('#angebote .offer-card, #preise .price-card')].filter(card =>
+    /kindergeburtstag/i.test(card.querySelector('h3')?.textContent || '')
+  );
+  cards.forEach(card => {
+    const strongs = card.querySelectorAll('.offer-price strong, .price-lines strong');
+    if (strongs[0]) strongs[0].textContent = low.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:2}) + ' € / h';
+    if (strongs[1]) strongs[1].textContent = high.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:2}) + ' € / h';
+  });
+}
+
 window.addEventListener('tps-public-data-ready', (e) => {
   const offers = e.detail?.offers || [];
   const courseOffers = offers.filter(isCourseOffer);
   const live = offers.filter(o => !isCourseOffer(o)).map(publicOfferToWorkshop).filter(Boolean);
+  applyBirthdayPriceOverride(offers);
 
   // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
   renderDynamicCourses(courseOffers);
