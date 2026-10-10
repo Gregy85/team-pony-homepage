@@ -13,7 +13,7 @@ if (menuBtn && nav) {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
-const TPS_HOMEPAGE_TEST_MODE = true;
+const TPS_HOMEPAGE_TEST_MODE = true; // Homepage V15
 const TPS_HOMEPAGE_TEST_CODE = '4826';
 let tpsTestUnlocked = sessionStorage.getItem('tps_homepage_test_unlocked') === '1';
 
@@ -130,6 +130,7 @@ function renderWorkshops() {
               <h4>${w.title}</h4>
               <div class="workshop-meta"><span>🕒 ${w.time}</span><span>⏱ ${w.duration}</span></div>
               <p class="workshop-description">${w.description}</p>
+              ${Array.isArray(w.images)&&w.images.length ? `<div class="workshop-photos ${w.images.length>1?'two':''}">${w.images.slice(0,2).map((src,i)=>`<img src="${src}" alt="${escapeHtml(w.title)} – Foto ${i+1}">`).join('')}</div>` : ''}
               ${w.extra ? `<p class="workshop-extra">${w.extra}</p>` : ''}
               <div class="workshop-card-actions">
                 <div class="workshop-price"><strong>${w.price}</strong><span>pro Kind</span></div>
@@ -146,6 +147,19 @@ const offerSelect = document.getElementById('offerSelect');
 const messageField = document.querySelector('#inquiryForm textarea[name="message"]');
 const requestedDateLabel = document.getElementById('requestedDateLabel');
 const fixedOfferSchedule = document.getElementById('fixedOfferSchedule');
+const childCountInput = document.getElementById('childCountInput');
+const childNameFields = document.getElementById('childNameFields');
+
+function renderChildNameFields() {
+  if (!childNameFields) return;
+  const count = Math.max(1, Math.min(30, Number(childCountInput?.value || 1)));
+  const old = [...childNameFields.querySelectorAll('input')].map(i => i.value);
+  childNameFields.innerHTML = Array.from({length:count}, (_,i) =>
+    `<label>Name Kind ${i+1}<input name="child_name_${i+1}" placeholder="Vorname" value="${escapeHtml(old[i] || '')}" /></label>`
+  ).join('');
+}
+childCountInput?.addEventListener('input', renderChildNameFields);
+renderChildNameFields();
 
 function selectedOfferOption() {
   return offerSelect?.selectedOptions?.[0] || null;
@@ -189,6 +203,7 @@ function addWorkshopOptions() {
     option.value = workshopOfferLabel(w);
     option.textContent = workshopOfferLabel(w);
     option.dataset.workshopId = w.id;
+    option.dataset.offerId = w.id;
     option.dataset.fixedDate = w.date || '';
     option.dataset.fixedTime = w.time || '';
     group.appendChild(option);
@@ -213,6 +228,21 @@ function prepareOffer(wanted, details = '') {
   if (messageField && details) messageField.value = details;
   updateInquiryScheduleFields();
   document.getElementById('anfrage')?.scrollIntoView({behavior:'smooth'});
+}
+
+
+function applyOfferFromUrl() {
+  const wanted = new URLSearchParams(location.search).get('angebot');
+  if (!wanted || !offerSelect) return false;
+  const option = [...offerSelect.options].find(o =>
+    String(o.dataset.offerId||o.dataset.courseId||o.dataset.workshopId||'') === String(wanted) ||
+    String(o.value||'') === String(wanted)
+  );
+  if (!option) return false;
+  offerSelect.value = option.value;
+  updateInquiryScheduleFields();
+  setTimeout(()=>document.getElementById('anfrage')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  return true;
 }
 
 document.querySelectorAll('[data-offer]').forEach(el => {
@@ -249,7 +279,7 @@ if (form) {
       `ich interessiere mich für: ${d.get('offer')}`,
       '',
       `Name: ${d.get('name') || ''}`,
-      `Kind: ${d.get('child') || ''}`,
+      `Kinder: ${Array.from({length:Math.max(1,Number(d.get('child_count')||1))},(_,i)=>d.get('child_name_'+(i+1))).filter(Boolean).join(', ')}`,
       `Alter: ${d.get('age') || ''}`,
       `Anzahl Kinder: ${d.get('child_count') || ''}`,
       `Termin/Datum: ${(selectedOfferOption()?.dataset?.fixedDate || d.get('requested_date') || '')}`,
@@ -268,7 +298,7 @@ if (form) {
 
     const messageWithChild = [
       TPS_HOMEPAGE_TEST_MODE ? '[TESTANFRAGE] Nur Test – nicht als echte Buchung/Einnahme verbuchen.' : '',
-      d.get('child') ? `Kind: ${d.get('child')}` : '',
+      Array.from({length:Math.max(1,Number(d.get('child_count')||1))},(_,i)=>d.get('child_name_'+(i+1))).filter(Boolean).length ? `Kinder: ${Array.from({length:Math.max(1,Number(d.get('child_count')||1))},(_,i)=>d.get('child_name_'+(i+1))).filter(Boolean).join(', ')}` : '',
       d.get('age') ? `Alter: ${d.get('age')}` : '',
       d.get('message') || ''
     ].filter(Boolean).join('\n');
@@ -288,10 +318,12 @@ if (form) {
       });
       if (statusEl) statusEl.textContent = TPS_HOMEPAGE_TEST_MODE ? 'Testanfrage gespeichert. Sie erscheint im TPS Manager deutlich als TEST.' : 'Danke! Die Anfrage wurde gespeichert und erscheint in der Team-Pony-Datenbank.';
       form.reset();
+      if(childCountInput) childCountInput.value='1';
+      renderChildNameFields();
       updateInquiryScheduleFields();
     } catch (err) {
       if (statusEl) statusEl.textContent = 'Die Online-Übertragung war nicht möglich. Es wird stattdessen eine E-Mail vorbereitet.';
-      const email = window.TPS_SITE?.email || 'sabrinaheidenwag@freenet.de';
+      const email = window.TPS_SITE?.email || 'info@team-pony-schule-freudenstadt.de';
       window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     } finally {
       if (submitButton) submitButton.disabled = false;
@@ -334,6 +366,7 @@ function renderDynamicCourses(offers = []) {
         <div class="offer-top"><div class="offer-icon">${icon}</div><span class="tag">${escapeHtml(tag)}</span></div>
         <h3>${escapeHtml(o.name || 'Kurs')}</h3>
         <p>${escapeHtml(o.description || 'Fortlaufender Ponykurs in einer kleinen Gruppe.')}</p>
+        ${[o.image_data,o.social_payload?.image2].filter(Boolean).length ? `<div class="dynamic-offer-photos ${[o.image_data,o.social_payload?.image2].filter(Boolean).length>1?'two':''}">${[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2).map((src,i)=>`<img src="${src}" alt="${escapeHtml(o.name||'Kurs')} – Foto ${i+1}">`).join('')}</div>` : ''}
         ${chips.length ? `<div class="chips">${chips.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>` : ''}
         ${price ? `<div class="offer-price"><strong>${price}</strong><span>${o.block_size ? `pro Kind · ${escapeHtml(o.block_size)} Termine` : 'pro Kind'}</span></div>` : ''}
         <a href="#anfrage" class="dynamic-course-request" data-course-id="${escapeHtml(o.id)}" data-course-name="${escapeHtml(o.name || 'Kurs')}">Kurs anfragen →</a>`;
@@ -355,6 +388,7 @@ function addDynamicCourseOptions(offers = []) {
     option.value = `${o.name}${date}`;
     option.textContent = `${o.name}${date}`;
     option.dataset.courseId = o.id;
+    option.dataset.offerId = o.id;
     option.dataset.fixedDate = o.date || '';
     option.dataset.fixedTime = o.time ? String(o.time).slice(0,5) + ' Uhr' : '';
     group.appendChild(option);
@@ -378,7 +412,7 @@ function publicOfferToWorkshop(o) {
   return {
     id: String(o.id), monthGroup: `${monthGroups[m-1]} ${y}`, date: String(o.date), day:String(d).padStart(2,'0'), month:monthNames[m-1], weekday:weekdays[dt.getDay()],
     type: o.offer_type || 'Workshop', title:o.name, age:o.age_text || '', time, duration, price,
-    description:o.description || '', extra:free, parentChild:/eltern/i.test(String(o.offer_type||''))
+    description:o.description || '', extra:free, parentChild:/eltern/i.test(String(o.offer_type||'')), images:[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2)
   };
 }
 
@@ -398,6 +432,7 @@ window.addEventListener('tps-public-data-ready', (e) => {
     renderWorkshops();
     addWorkshopOptions();
   }
+  applyOfferFromUrl();
 });
 
 document.addEventListener('click', (e) => {
