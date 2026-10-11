@@ -52,7 +52,7 @@ async function createHomepageTestVoucher(){
   btn.disabled=true; status.textContent='Testzahlung wird durchgeführt …';
   try{
     const v=await window.TPS_API.rpc('create_test_voucher_purchase',{
-      p_test_code:TPS_HOMEPAGE_TEST_CODE,p_value:value,p_template_id:window.tpsSelectedVoucherTemplate,
+      p_value:value,p_template_id:window.tpsSelectedVoucherTemplate,
       p_buyer_name:document.getElementById('publicVoucherBuyer')?.value||null,
       p_buyer_email:document.getElementById('publicVoucherEmail')?.value||null,
       p_recipient_name:document.getElementById('publicVoucherRecipient')?.value||null,
