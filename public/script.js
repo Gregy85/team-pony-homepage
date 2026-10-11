@@ -20,6 +20,7 @@ let tpsTestUnlocked = sessionStorage.getItem('tps_homepage_test_unlocked') === '
 function applyHomepageTestLock() {
   
 window.tpsSelectedVoucherTemplate = null;
+window.tpsVoucherTemplateRows = [];
 
 function voucherTemplateImage(t) {
   return t?.template_data?.dataUrl || '';
@@ -29,6 +30,7 @@ async function loadPublicVoucherTemplates() {
   if(!box||!window.TPS_API?.rpc) return;
   try{
     const rows=await window.TPS_API.rpc('get_public_voucher_templates')||[];
+    window.tpsVoucherTemplateRows=rows;
     if(!rows.length){box.innerHTML='<p>Noch keine Gutschein-Designs verfügbar.</p>';return}
     box.innerHTML=rows.map(t=>{
       const img=voucherTemplateImage(t);
@@ -59,8 +61,22 @@ async function createHomepageTestVoucher(){
       p_message:document.getElementById('publicVoucherMessage')?.value||null,p_service:null
     });
     status.textContent='Testzahlung erfolgreich – es wurde kein echtes Geld abgebucht.';
-    result.innerHTML='<div class="voucher-success"><strong>TEST-GUTSCHEIN ERSTELLT</strong><div id="publicVoucherQr"></div><b>'+escapeHtml(v.code)+'</b><span>'+Number(v.value).toLocaleString('de-DE',{style:'currency',currency:'EUR'})+' · gültig bis '+voucherDateDE(v.valid_until)+'</span><button class="btn secondary" type="button" onclick="window.print()">Gutschein / Bestätigung drucken</button></div>';
-    if(window.QRCode) new QRCode(document.getElementById('publicVoucherQr'),{text:'TEAM-PONY-VOUCHER:'+v.code,width:180,height:180,correctLevel:QRCode.CorrectLevel.H});
+    const template=window.tpsVoucherTemplateRows.find(x=>x.id===window.tpsSelectedVoucherTemplate)?.template_data||{};
+    const at=(x,y)=>'left:'+Number(x||0)+'%;top:'+Number(y||0)+'%;';
+    const width=Number(template.width||1580),height=Number(template.height||1000);
+    const bg=template.dataUrl||'';
+    const service=Number(v.value).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+    result.innerHTML='<div class="voucher-success"><strong>TEST-GUTSCHEIN ERSTELLT</strong><div class="public-voucher-preview" style="aspect-ratio:'+width+'/'+height+'">'+
+      (bg?'<img class="public-voucher-bg" src="'+bg+'" alt="Gutschein-Design">':'')+
+      (template.conceptShow!==false?'<img class="public-voucher-logo" src="assets/team-pony-concept.jpg" style="'+at(template.conceptX??2.5,template.conceptY??2.5)+'width:'+Number(template.conceptW??21)+'%">':'')+
+      (template.roundShow!==false?'<img class="public-voucher-logo" src="assets/team-pony-schule-freudenstadt.jpg" style="'+at(template.roundX??42,template.roundY??2)+'width:'+Number(template.roundW??16)+'%">':'')+
+      '<span class="public-voucher-field" style="'+at(template.serviceX??34,template.serviceY??70)+'">'+escapeHtml(service)+'</span>'+
+      '<span class="public-voucher-field" style="'+at(template.expiryX??34,template.expiryY??76)+'">'+escapeHtml(voucherDateDE(v.valid_until))+'</span>'+
+      '<div class="public-voucher-qr" style="'+at(template.qrX??78,template.qrY??62)+'width:'+Number(template.qrW??16)+'%"><div id="publicVoucherQr"></div></div>'+
+      '<span class="public-voucher-field public-voucher-code" style="'+at(template.codeX??78,template.codeY??82)+'">'+escapeHtml(v.code)+'</span>'+
+      '<span class="public-voucher-testmark">TEST · NICHT BEZAHLT</span></div>'+
+      '<b>'+escapeHtml(v.code)+'</b><span>'+service+' · gültig bis '+voucherDateDE(v.valid_until)+'</span><button class="btn secondary" type="button" onclick="window.print()">Gutschein als PDF / Drucken</button></div>';
+    if(window.QRCode) new QRCode(document.getElementById('publicVoucherQr'),{text:'TEAM-PONY-VOUCHER:'+v.code,width:240,height:240,correctLevel:QRCode.CorrectLevel.H});
   }catch(e){status.textContent='Testkauf fehlgeschlagen: '+(e?.message||e)}
   finally{btn.disabled=!tpsTestUnlocked||!window.tpsSelectedVoucherTemplate}
 }
