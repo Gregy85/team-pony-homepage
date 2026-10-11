@@ -78,3 +78,10 @@
 .child-name-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:15px}
 .child-name-fields label{margin-bottom:0}
 @media(max-width:640px){.child-name-fields,.workshop-photos.two,.dynamic-offer-photos.two{grid-template-columns:1fr}}
+
+/* V17 – TEAM PONY Netzwerk */
+.concept-logo{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.concept-logo>a{display:inline-flex}
+.concept-network-links{display:flex;flex-direction:column;gap:6px}
+.concept-network-links a{font-size:12px;font-weight:800;line-height:1.3;text-decoration:none}
+.concept-network-links a:hover{text-decoration:underline}
