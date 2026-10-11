@@ -431,10 +431,80 @@ function applyBirthdayPriceOverride(offers = []) {
   });
 }
 
+
+function isBaseHomepageOffer(o){
+  return o?.social_payload?.base_offer===true || String(o?.social_payload?.base_offer||'')==='true';
+}
+function tpsEuro(v){
+  if(v==null||v===''||Number.isNaN(Number(v))) return '';
+  return Number(v).toLocaleString('de-DE',{minimumFractionDigits:Number(v)%1?2:0,maximumFractionDigits:2})+' €';
+}
+function tpsFindStaticOfferCard(key){
+  const map={
+    'mini-course':'Mini-Kurse','maxi-course':'Maxi-Kurse','workshops-actions':'Workshops & Aktionen',
+    'parent-child-workshop':'Eltern-Kind-Workshops','birthday':'Kindergeburtstage',
+    'family-friends':'Familien- & Freundezeit','school-fit':'Mit dem Pony fit für die Schule',
+    'kindergarten-school':'Kindergärten & Schulen'
+  };
+  let card=document.querySelector('#angebote .offer-card[data-static-key="'+key+'"]');
+  if(card) return card;
+  card=[...document.querySelectorAll('#angebote .offer-card')].find(x=>(x.querySelector('h3')?.textContent||'').trim()===map[key]);
+  if(card) card.dataset.staticKey=key;
+  return card;
+}
+function tpsSetBaseOfferPhotos(card,o){
+  if(!card) return;
+  card.querySelector('.base-offer-photos')?.remove();
+  const imgs=[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2);
+  if(!imgs.length) return;
+  const host=document.createElement('div');
+  host.className='dynamic-offer-photos base-offer-photos'+(imgs.length>1?' two':'');
+  host.innerHTML=imgs.map((src,i)=>'<img src="'+src+'" alt="'+escapeHtml(o.name||'Angebot')+' – Foto '+(i+1)+'">').join('');
+  const p=[...card.children].find(el=>el.tagName==='P');
+  if(p) p.insertAdjacentElement('afterend',host); else card.appendChild(host);
+}
+function applyEditableBaseOffers(offers=[]){
+  const base=offers.filter(isBaseHomepageOffer);
+  base.forEach(o=>{
+    const key=o.social_payload?.static_key; if(!key) return;
+    const card=tpsFindStaticOfferCard(key);
+    if(card){
+      const h=card.querySelector('h3'); if(h&&o.name) h.textContent=o.name;
+      const p=[...card.children].find(el=>el.tagName==='P'); if(p&&o.description) p.textContent=o.description;
+      const tag=card.querySelector('.tag'); if(tag&&o.age_text) tag.textContent=o.age_text;
+      tpsSetBaseOfferPhotos(card,o);
+      if(key==='mini-course'||key==='maxi-course'){
+        const el=card.querySelector('.offer-price strong'); if(el&&o.price!=null) el.textContent=tpsEuro(o.price);
+      }else if(key==='workshops-actions'){
+        const vals=[o.price,o.social_payload?.price_2h,o.social_payload?.price_3h];
+        card.querySelectorAll('.mini-prices span').forEach((el,i)=>{if(vals[i]!=null){const h=el.querySelector('strong')?.textContent||'';el.innerHTML='<strong>'+escapeHtml(h)+'</strong> '+tpsEuro(vals[i])}});
+      }else if(key==='parent-child-workshop'){
+        const el=card.querySelector('.mini-prices span'); if(el&&o.price!=null){const h=el.querySelector('strong')?.textContent||'1,5 h';el.innerHTML='<strong>'+escapeHtml(h)+'</strong> '+tpsEuro(o.price)}
+      }else if(key==='birthday'||key==='family-friends'){
+        const vals=[o.price,o.social_payload?.birthday_price_high??o.social_payload?.tier_price_high??70];
+        card.querySelectorAll('.offer-price strong').forEach((el,i)=>{if(vals[i]!=null)el.textContent=tpsEuro(vals[i])+' / h'});
+      }
+    }
+    if(key==='school-fit'){
+      const sec=document.querySelector('.school-fit');
+      if(sec){const h=sec.querySelector('h2'),p=sec.querySelector('.fit-copy > p');if(h&&o.name)h.textContent=o.name;if(p&&o.description)p.textContent=o.description}
+    }
+  });
+  const byKey=Object.fromEntries(base.map(o=>[o.social_payload?.static_key,o]));
+  const pcs=[...document.querySelectorAll('#preise .price-card')], pc=t=>pcs.find(x=>(x.querySelector('h3')?.textContent||'').trim()===t);
+  const mini=byKey['mini-course'],maxi=byKey['maxi-course'],cp=pc('Mini- & Maxi-Kurse');
+  if(cp&&(mini?.price!=null||maxi?.price!=null)){const el=cp.querySelector('.big-price');if(el){const a=mini?.price,b=maxi?.price;el.textContent=(a!=null&&b!=null&&Number(a)!==Number(b))?'Mini '+tpsEuro(a)+' · Maxi '+tpsEuro(b):tpsEuro(a??b)}}
+  const wa=byKey['workshops-actions'],wp=pc('Workshops');if(wa&&wp){[wa.price,wa.social_payload?.price_2h,wa.social_payload?.price_3h].forEach((v,i)=>{const el=wp.querySelectorAll('.price-lines strong')[i];if(el&&v!=null)el.textContent=tpsEuro(v)})}
+  const par=byKey['parent-child-workshop'],parp=pc('Eltern-Kind-Workshops');if(par&&parp&&parp.querySelector('.price-lines strong'))parp.querySelector('.price-lines strong').textContent=tpsEuro(par.price);
+  const fam=byKey['family-friends'],famp=pc('Familien- & Freundezeit');if(fam&&famp){[fam.price,fam.social_payload?.tier_price_high??70].forEach((v,i)=>{const el=famp.querySelectorAll('.price-lines strong')[i];if(el&&v!=null)el.textContent=tpsEuro(v)+' / h'})}
+  const bd=byKey['birthday'],bdp=pc('Kindergeburtstag');if(bd&&bdp){[bd.price,bd.social_payload?.birthday_price_high??70].forEach((v,i)=>{const el=bdp.querySelectorAll('.price-lines strong')[i];if(el&&v!=null)el.textContent=tpsEuro(v)+' / h'})}
+}
+
 window.addEventListener('tps-public-data-ready', (e) => {
   const offers = e.detail?.offers || [];
-  const courseOffers = offers.filter(isCourseOffer);
-  const live = offers.filter(o => !isCourseOffer(o)).map(publicOfferToWorkshop).filter(Boolean);
+  const courseOffers = offers.filter(isCourseOffer).filter(o=>!isBaseHomepageOffer(o));
+  const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o)).map(publicOfferToWorkshop).filter(Boolean);
+  applyEditableBaseOffers(offers);
   applyBirthdayPriceOverride(offers);
 
   // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
