@@ -18,7 +18,57 @@ const TPS_HOMEPAGE_TEST_CODE = '4826';
 let tpsTestUnlocked = sessionStorage.getItem('tps_homepage_test_unlocked') === '1';
 
 function applyHomepageTestLock() {
-  const form = document.getElementById('inquiryForm');
+  
+window.tpsSelectedVoucherTemplate = null;
+
+function voucherTemplateImage(t) {
+  return t?.template_data?.dataUrl || '';
+}
+async function loadPublicVoucherTemplates() {
+  const box=document.getElementById('publicVoucherTemplates');
+  if(!box||!window.TPS_API?.rpc) return;
+  try{
+    const rows=await window.TPS_API.rpc('get_public_voucher_templates')||[];
+    if(!rows.length){box.innerHTML='<p>Noch keine Gutschein-Designs verfügbar.</p>';return}
+    box.innerHTML=rows.map(t=>{
+      const img=voucherTemplateImage(t);
+      return '<button type="button" class="public-voucher-template" data-voucher-template="'+escapeHtml(t.id)+'">'+(img?'<img src="'+img+'" alt="'+escapeHtml(t.name)+'">':'')+'<strong>'+escapeHtml(t.name)+'</strong></button>';
+    }).join('');
+    box.querySelectorAll('[data-voucher-template]').forEach(btn=>btn.addEventListener('click',()=>{
+      window.tpsSelectedVoucherTemplate=btn.dataset.voucherTemplate;
+      box.querySelectorAll('.public-voucher-template').forEach(x=>x.classList.toggle('active',x===btn));
+      const buy=document.getElementById('publicVoucherBuyTest');
+      if(buy) buy.disabled=!tpsTestUnlocked;
+    }));
+  }catch(e){box.innerHTML='<p>Gutschein-Designs konnten gerade nicht geladen werden.</p>'}
+}
+function voucherDateDE(v){if(!v)return '—';return new Date(v+'T12:00:00').toLocaleDateString('de-DE')}
+async function createHomepageTestVoucher(){
+  const status=document.getElementById('publicVoucherStatus'),result=document.getElementById('publicVoucherResult'),btn=document.getElementById('publicVoucherBuyTest');
+  if(!tpsTestUnlocked){document.getElementById('testUnlockBox')?.scrollIntoView({behavior:'smooth'});return}
+  const value=Number(document.getElementById('publicVoucherValue')?.value||0);
+  if(!window.tpsSelectedVoucherTemplate){status.textContent='Bitte zuerst ein Design auswählen.';return}
+  if(value<=0){status.textContent='Bitte einen Wunschbetrag eingeben.';return}
+  btn.disabled=true; status.textContent='Testzahlung wird durchgeführt …';
+  try{
+    const v=await window.TPS_API.rpc('create_test_voucher_purchase',{
+      p_test_code:TPS_HOMEPAGE_TEST_CODE,p_value:value,p_template_id:window.tpsSelectedVoucherTemplate,
+      p_buyer_name:document.getElementById('publicVoucherBuyer')?.value||null,
+      p_buyer_email:document.getElementById('publicVoucherEmail')?.value||null,
+      p_recipient_name:document.getElementById('publicVoucherRecipient')?.value||null,
+      p_message:document.getElementById('publicVoucherMessage')?.value||null,p_service:null
+    });
+    status.textContent='Testzahlung erfolgreich – es wurde kein echtes Geld abgebucht.';
+    result.innerHTML='<div class="voucher-success"><strong>TEST-GUTSCHEIN ERSTELLT</strong><div id="publicVoucherQr"></div><b>'+escapeHtml(v.code)+'</b><span>'+Number(v.value).toLocaleString('de-DE',{style:'currency',currency:'EUR'})+' · gültig bis '+voucherDateDE(v.valid_until)+'</span><button class="btn secondary" type="button" onclick="window.print()">Gutschein / Bestätigung drucken</button></div>';
+    if(window.QRCode) new QRCode(document.getElementById('publicVoucherQr'),{text:'TEAM-PONY-VOUCHER:'+v.code,width:180,height:180,correctLevel:QRCode.CorrectLevel.H});
+  }catch(e){status.textContent='Testkauf fehlgeschlagen: '+(e?.message||e)}
+  finally{btn.disabled=!tpsTestUnlocked||!window.tpsSelectedVoucherTemplate}
+}
+document.getElementById('publicVoucherBuyTest')?.addEventListener('click',createHomepageTestVoucher);
+window.addEventListener('tps-site-ready',loadPublicVoucherTemplates);
+if(window.TPS_API) loadPublicVoucherTemplates();
+
+const form = document.getElementById('inquiryForm');
   const status = document.getElementById('testUnlockStatus');
   if (!form || !TPS_HOMEPAGE_TEST_MODE) return;
   form.classList.toggle('is-test-locked', !tpsTestUnlocked);
@@ -29,6 +79,12 @@ function applyHomepageTestLock() {
   if (status) status.textContent = tpsTestUnlocked
     ? 'Testmodus freigeschaltet – Testanfragen werden deutlich als TEST markiert.'
     : 'Anfrageformular ist gesperrt.';
+  const voucherBuy = document.getElementById('publicVoucherBuyTest');
+  if (voucherBuy) voucherBuy.disabled = !tpsTestUnlocked || !window.tpsSelectedVoucherTemplate;
+  const voucherStatus = document.getElementById('publicVoucherStatus');
+  if (voucherStatus) voucherStatus.textContent = tpsTestUnlocked
+    ? 'Testmodus freigeschaltet. Es wird kein echtes Geld abgebucht.'
+    : 'Zum Testen zuerst den Testzugang unten auf der Seite freischalten.';
 }
 
 function unlockHomepageTestMode() {
@@ -52,6 +108,26 @@ applyHomepageTestLock();
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+function updateWorkshopMonthsText() {
+  const el=document.getElementById('workshopMonthsText');
+  const intro=document.getElementById('workshopIntroText');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dates=(workshops||[]).map(w=>new Date(String(w.date||'')+'T12:00:00')).filter(d=>!Number.isNaN(d.getTime())&&d>=today);
+  const groups=[...new Map(dates.sort((a,b)=>a-b).map(d=>[d.getFullYear()+'-'+d.getMonth(),{month:d.toLocaleDateString('de-DE',{month:'long'}),year:d.getFullYear()}])).values()];
+  let label='';
+  if(groups.length===1) label=groups[0].month+' '+groups[0].year;
+  else if(groups.length>1){
+    const sameYear=groups.every(g=>g.year===groups[0].year);
+    const names=groups.map((g,i)=>sameYear?g.month:g.month+' '+g.year);
+    label=names.length===2?names.join(' und '):names.slice(0,-1).join(', ')+' und '+names.at(-1);
+    if(sameYear) label+=' '+groups[0].year;
+  }
+  const text=label?('Die aktuell verfügbaren Workshops für '+label+' findest du direkt hier.'):'Neue Workshop-Termine folgen.';
+  if(el) el.textContent=text;
+  if(intro) intro.textContent=text;
+}
+
 
 let workshops = [
   {
@@ -528,3 +604,6 @@ document.addEventListener('click', (e) => {
   const option = offerSelect ? [...offerSelect.options].find(o => o.dataset.courseId === a.dataset.courseId) : null;
   prepareOffer(option?.value || name, `Ich interessiere mich für den Kurs „${name}“.`);
 });
+
+window.addEventListener('tps-public-data-ready',()=>setTimeout(updateWorkshopMonthsText,0));
+setTimeout(updateWorkshopMonthsText,0);
