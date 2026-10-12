@@ -115,3 +115,6 @@
   .public-voucher-preview{width:100%;max-width:none;border-radius:0;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
   .public-voucher-preview *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
+
+/* V20 – dynamische Angebote & bündige Workshop-Aktionen */
+.workshop-card-body{display:flex;flex-direction:column;min-width:0}.workshop-card-actions{margin-top:auto}.dynamic-base-card{display:flex;flex-direction:column}.dynamic-base-card .offer-actions{margin-top:auto}.dynamic-base-card .offer-price,.dynamic-base-card .mini-prices{margin-top:auto}.dynamic-price-card{display:flex;flex-direction:column}
