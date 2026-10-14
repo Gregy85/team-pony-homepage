@@ -463,8 +463,19 @@ function renderBaseOffers(offers=[]){
     }).join('');
   }
   if(prices){
-    const priced=rows.filter(o=>o.price!=null&&o.price!=='');
-    prices.innerHTML=priced.map(o=>'<article class="price-card dynamic-price-card"><div class="price-icon">'+baseOfferIcon(o)+'</div><h3>'+escapeHtml(o.name||'Angebot')+'</h3>'+baseOfferPriceHtml(o)+'</article>').join('');
+    const priceText=o=>{
+      const key=String(o.social_payload?.static_key||'');
+      const p=o.social_payload||{};
+      const money=v=>tpsEuro(v)||'auf Anfrage';
+      if(key==='workshops-actions') return '1,5 h '+money(o.price)+' · 2 h '+money(p.price_2h)+' · 3 h '+money(p.price_3h)+' / Kind';
+      if(key==='parent-child-workshop') return '1,5 h '+money(o.price)+' / Kind';
+      if(key==='birthday'||key==='family-friends') return money(o.price)+'/h bis 4 Kinder · '+money(p.tier_price_high??p.birthday_price_high)+'/h ab 5 Kinder';
+      if(o.price==null||o.price==='') return 'auf Anfrage';
+      return money(o.price)+(isCourseOffer(o)?' / Kind'+(o.block_size?' · '+o.block_size+' Termine':''):'');
+    };
+    prices.innerHTML='<div class="price-overview" role="list">'+rows.map(o=>
+      '<div class="price-overview-row" role="listitem"><span class="price-overview-name">'+escapeHtml(o.name||'Angebot')+'</span><strong class="price-overview-value">'+escapeHtml(priceText(o))+'</strong></div>'
+    ).join('')+'</div>';
   }
 }
 function renderDynamicCourses(offers = []) {
