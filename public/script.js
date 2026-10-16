@@ -227,7 +227,7 @@ function renderWorkshops() {
               ${w.extra ? `<p class="workshop-extra">${w.extra}</p>` : ''}
               <div class="workshop-card-actions">
                 <div class="workshop-price"><strong>${w.price}</strong><span>pro Kind</span></div>
-                ${w.state==='soldout'?`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}" disabled>Ausgebucht</button>`:`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">${w.bookingMode==='direct'?'Buchung anfragen':'Workshop anfragen'}</button>`}
+                ${w.state==='soldout'?`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}" disabled>Ausgebucht</button>`:`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">${'Workshop anfragen'}</button>`}
               </div>
             </div>
           </article>`).join('')}
@@ -533,7 +533,7 @@ function publicOfferToWorkshop(o) {
     id: String(o.id), monthGroup: `${monthGroups[m-1]} ${y}`, date: String(o.date), day:String(d).padStart(2,'0'), month:monthNames[m-1], weekday:weekdays[dt.getDay()],
     type: o.offer_type || 'Workshop', title:o.name, age:o.age_text || '', time, duration, price,
     description:o.description || '', shortText:o.social_payload?.short_text||'', extra:free, state,
-    bookingMode:o.social_payload?.booking_mode||'inquiry',
+    bookingMode:'inquiry',
     kindLabel:({workshop:'Workshop',action:'Aktion',holiday:'Ferienprogramm'})[o.social_payload?.workshop_kind]||(o.offer_type||'Workshop'),
     parentChild:/eltern/i.test(String(o.offer_type||'')), images:[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2)
   };
