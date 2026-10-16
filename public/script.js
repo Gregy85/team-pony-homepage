@@ -227,7 +227,7 @@ function renderWorkshops() {
               ${w.extra ? `<p class="workshop-extra">${w.extra}</p>` : ''}
               <div class="workshop-card-actions">
                 <div class="workshop-price"><strong>${w.price}</strong><span>pro Kind</span></div>
-                ${w.state==='soldout'?`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}" disabled>Ausgebucht</button>`:`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">${w.bookingMode==='direct'?'Jetzt buchen':'Workshop anfragen'}</button>`}
+                ${w.state==='soldout'?`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}" disabled>Ausgebucht</button>`:`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">${w.bookingMode==='direct'?'Buchung anfragen':'Workshop anfragen'}</button>`}
               </div>
             </div>
           </article>`).join('')}
