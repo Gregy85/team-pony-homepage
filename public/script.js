@@ -219,15 +219,15 @@ function renderWorkshops() {
           <article class="workshop-card" data-workshop-id="${w.id}">
             <div class="workshop-date"><span class="day">${w.day}</span><span class="month">${w.month}</span><span class="weekday">${w.weekday}</span></div>
             <div class="workshop-card-body">
-              <div class="workshop-card-top"><span class="workshop-type">${w.type}</span><span class="workshop-age">${w.age}</span></div>
+              <div class="workshop-card-top"><span class="workshop-type">${escapeHtml(w.kindLabel||w.type)}</span><span class="workshop-age">${escapeHtml(w.age||'')}</span></div>
               <h4>${w.title}</h4>
               <div class="workshop-meta"><span>🕒 ${w.time}</span><span>⏱ ${w.duration}</span></div>
-              <p class="workshop-description">${w.description}</p>
+              <p class="workshop-description">${escapeHtml(w.shortText||w.description||'')}</p>
               ${Array.isArray(w.images)&&w.images.length ? `<div class="workshop-photos ${w.images.length>1?'two':''}">${w.images.slice(0,2).map((src,i)=>`<img src="${src}" alt="${escapeHtml(w.title)} – Foto ${i+1}">`).join('')}</div>` : ''}
               ${w.extra ? `<p class="workshop-extra">${w.extra}</p>` : ''}
               <div class="workshop-card-actions">
                 <div class="workshop-price"><strong>${w.price}</strong><span>pro Kind</span></div>
-                <button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">Workshop anfragen</button>
+                ${w.state==='soldout'?`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}" disabled>Ausgebucht</button>`:`<button class="btn primary workshop-request" type="button" data-workshop-id="${w.id}">${w.bookingMode==='direct'?'Jetzt buchen':'Workshop anfragen'}</button>`}
               </div>
             </div>
           </article>`).join('')}
@@ -294,7 +294,8 @@ function addWorkshopOptions() {
   current.forEach(w => {
     const option = document.createElement('option');
     option.value = workshopOfferLabel(w);
-    option.textContent = workshopOfferLabel(w);
+    option.textContent = workshopOfferLabel(w)+(w.state==='soldout'?' · ausgebucht':'');
+    option.disabled = w.state==='soldout';
     option.dataset.workshopId = w.id;
     option.dataset.offerId = w.id;
     option.dataset.fixedDate = w.date || '';
@@ -348,7 +349,9 @@ document.addEventListener('click', (e) => {
   const workshop = workshops.find(w => w.id === btn.dataset.workshopId);
   if (!workshop) return;
   const label = workshopOfferLabel(workshop);
-  const details = `Ich interessiere mich für den Workshop „${workshop.title}“ am ${formatWorkshopDate(workshop)}, ${workshop.time}.`;
+  const details = workshop.bookingMode==='direct'
+    ? `Ich möchte den Workshop „${workshop.title}“ am ${formatWorkshopDate(workshop)}, ${workshop.time} buchen.`
+    : `Ich interessiere mich für den Workshop „${workshop.title}“ am ${formatWorkshopDate(workshop)}, ${workshop.time}.`;
   prepareOffer(label, details);
 });
 
@@ -524,11 +527,15 @@ function publicOfferToWorkshop(o) {
   const time = o.time ? `${fmtTime(o.time)}${o.end_time ? '–'+fmtTime(o.end_time) : ''} Uhr` : '';
   const duration = o.duration_minutes ? `${String(o.duration_minutes/60).replace('.', ',')} Stunden` : '';
   const price = o.price != null ? `${Number(o.price).toLocaleString('de-DE',{minimumFractionDigits:Number(o.price)%1?2:0,maximumFractionDigits:2})} €` : '';
-  const free = o.free_spots != null ? `Noch ${o.free_spots} freie ${Number(o.free_spots)===1?'Platz':'Plätze'}.` : '';
+  const state=o.social_payload?.workshop_state||(o.status==='ausgebucht'?'soldout':o.published?'active':'draft');
+  const free = state==='soldout' ? 'Ausgebucht.' : (o.free_spots != null ? `Noch ${o.free_spots} freie ${Number(o.free_spots)===1?'Platz':'Plätze'}.` : '');
   return {
     id: String(o.id), monthGroup: `${monthGroups[m-1]} ${y}`, date: String(o.date), day:String(d).padStart(2,'0'), month:monthNames[m-1], weekday:weekdays[dt.getDay()],
     type: o.offer_type || 'Workshop', title:o.name, age:o.age_text || '', time, duration, price,
-    description:o.description || '', extra:free, parentChild:/eltern/i.test(String(o.offer_type||'')), images:[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2)
+    description:o.description || '', shortText:o.social_payload?.short_text||'', extra:free, state,
+    bookingMode:o.social_payload?.booking_mode||'inquiry',
+    kindLabel:({workshop:'Workshop',action:'Aktion',holiday:'Ferienprogramm'})[o.social_payload?.workshop_kind]||(o.offer_type||'Workshop'),
+    parentChild:/eltern/i.test(String(o.offer_type||'')), images:[o.image_data,o.social_payload?.image2].filter(Boolean).slice(0,2)
   };
 }
 
@@ -619,7 +626,7 @@ function applyEditableBaseOffers(offers=[]){
 window.addEventListener('tps-public-data-ready', (e) => {
   const offers = e.detail?.offers || [];
   const courseOffers = offers.filter(isCourseOffer).filter(o=>!isBaseHomepageOffer(o));
-  const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o)).map(publicOfferToWorkshop).filter(Boolean);
+  const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o)).filter(o=>!['draft','archived'].includes(String(o.social_payload?.workshop_state||''))).map(publicOfferToWorkshop).filter(Boolean);
   renderBaseOffers(offers);
 
   // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
