@@ -623,11 +623,45 @@ function applyEditableBaseOffers(offers=[]){
   const bd=byKey['birthday'],bdp=pc('Kindergeburtstag');if(bd&&bdp){[bd.price,bd.social_payload?.birthday_price_high??70].forEach((v,i)=>{const el=bdp.querySelectorAll('.price-lines strong')[i];if(el&&v!=null)el.textContent=tpsEuro(v)+' / h'})}
 }
 
+
+function isInsightVideoOffer(o) {
+  return String(o?.social_payload?.content_kind || '') === 'homepage_video' || String(o?.offer_type || '').toLowerCase() === 'einblicke / videos';
+}
+
+function renderInsightVideos(offers = []) {
+  const section = document.getElementById('einblicke');
+  const host = document.getElementById('insightVideoList');
+  if (!section || !host) return;
+  const rows = offers
+    .filter(isInsightVideoOffer)
+    .filter(o => o.published !== false && o.social_payload?.video_url)
+    .sort((a,b) => String(b.social_payload?.media_date || b.updated_at || b.created_at || '').localeCompare(String(a.social_payload?.media_date || a.updated_at || a.created_at || '')))
+    .slice(0, 6);
+
+  if (!rows.length) {
+    section.hidden = true;
+    host.innerHTML = '';
+    return;
+  }
+
+  section.hidden = false;
+  host.innerHTML = rows.map((o, i) => {
+    const p = o.social_payload || {};
+    const date = p.media_date ? formatPublicDate(p.media_date) : '';
+    return '<article class="insight-video-card' + (i === 0 ? ' featured' : '') + '">' +
+      '<div class="insight-video-media"><video src="' + escapeHtml(p.video_url) + '" controls playsinline preload="metadata" aria-label="' + escapeHtml(o.name || 'Einblick') + '"></video></div>' +
+      '<div class="insight-video-copy"><div class="insight-video-label">🎬 Einblick' + (date ? ' · ' + escapeHtml(date) : '') + '</div><h3>' + escapeHtml(o.name || 'Ponyzeit bei Team Pony') + '</h3>' +
+      (o.description ? '<p>' + escapeHtml(o.description) + '</p>' : '') +
+      '</div></article>';
+  }).join('');
+}
+
 window.addEventListener('tps-public-data-ready', (e) => {
   const offers = e.detail?.offers || [];
   const courseOffers = offers.filter(isCourseOffer).filter(o=>!isBaseHomepageOffer(o));
-  const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o)).filter(o=>!['draft','archived'].includes(String(o.social_payload?.workshop_state||''))).map(publicOfferToWorkshop).filter(Boolean);
+  const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o) && !isInsightVideoOffer(o)).filter(o=>!['draft','archived'].includes(String(o.social_payload?.workshop_state||''))).map(publicOfferToWorkshop).filter(Boolean);
   renderBaseOffers(offers);
+  renderInsightVideos(offers);
 
   // Manuell angelegte Kurse bekommen exakt dieselben Angebotskarten wie die vorhandenen Kurse.
   renderDynamicCourses(offers);
