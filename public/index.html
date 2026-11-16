@@ -149,6 +149,10 @@
           <p>Alle Angebote und Preise findest du direkt hier auf einen Blick.</p>
         </div>
         <div class="cards" id="offerCards" aria-live="polite"></div>
+        <section aria-labelledby="aktuelle-kurse">
+          <h3 id="aktuelle-kurse" tabindex="-1" style="scroll-margin-top: 7rem">Aktuelle Kurse</h3>
+          <div class="cards" id="currentCourseCards" aria-live="polite" aria-busy="true"></div>
+        </section>
       </div>
     </section>
 
@@ -178,13 +182,13 @@
         </div>
         <div class="steps-grid">
           <article><div class="step-number">1</div><h3>Kursstart</h3><p>Einige Kurse starten, sobald die benötigte Mindestteilnehmerzahl erreicht ist.</p></article>
-          <article><div class="step-number">2</div><h3>10er-Block</h3><p>Die 10er-Blöcke bauen aufeinander auf. Besonders im Mini-Kurs entwickeln die Kinder Schritt für Schritt Erfahrung und Selbstständigkeit.</p></article>
+          <article><div class="step-number">2</div><h3>Kursblock</h3><p>Je nach Kurs umfasst ein Block unterschiedlich viele Termine. Die Kursblöcke bauen aufeinander auf.</p></article>
           <article><div class="step-number">3</div><h3>Einstieg möglich</h3><p>Wenn noch ein Platz frei ist und es zum Kurs passt, kann ein Kind auch in einen bereits laufenden Block einsteigen.</p></article>
           <article><div class="step-number">4</div><h3>Wie geht es weiter?</h3><p>Zwei Termine vor Blockende fragen wir nach, ob das Kind im nächsten 10er-Block weitermachen möchte. Der Wechsel von Mini zu Maxi erfolgt separat, sobald das Kind dafür bereit ist.</p></article>
         </div>
         <div class="course-note">
           <span>💡</span>
-          <div><strong>Freie Plätze werden aktuell angezeigt.</strong></div>
+          <div><strong><a href="#aktuelle-kurse" style="text-decoration: underline">Zu den freien Plätzen</a></strong></div>
         </div>
       </div>
     </section>
@@ -346,7 +350,7 @@
 
   <script src="site-config.js?v=20"></script>
   <script src="site-runtime.js?v=20"></script>
-  <script src="script.js?v=24"></script>
+  <script src="script.js?v=25"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </body>
 </html>

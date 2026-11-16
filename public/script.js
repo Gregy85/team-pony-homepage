@@ -490,9 +490,15 @@ function isCurrentCourseOffer(offer) {
 
 function renderDynamicCourses(offers = []) {
   // Grundangebote werden von renderBaseOffers gerendert.
-  const cards=document.getElementById('offerCards'); if(!cards) return;
-  cards.querySelectorAll('.dynamic-course-card').forEach(el=>el.remove());
-  offers.filter(isCurrentCourseOffer).forEach(o=>{
+  const cards=document.getElementById('currentCourseCards'); if(!cards) return;
+  const current=offers.filter(isCurrentCourseOffer);
+  cards.replaceChildren();
+  if (!current.length) {
+    const notice=document.createElement('p');
+    notice.textContent='Derzeit sind keine aktuellen Kurse veröffentlicht.';
+    cards.appendChild(notice);
+  }
+  current.forEach(o=>{
     const article=document.createElement('article'); article.className='offer-card course-card dynamic-course-card dynamic-base-card';
     const price=o.price!=null&&o.price!==''?'<div class="offer-price"><strong>'+tpsEuro(o.price)+'</strong><span>'+(o.block_size?'pro Kind · '+escapeHtml(o.block_size)+' Termine':'pro Kind')+'</span></div>':'';
     const places = o.free_spots == null ? null : Number(o.free_spots);
@@ -502,6 +508,7 @@ function renderDynamicCourses(offers = []) {
     article.innerHTML='<div class="offer-top"><div class="offer-icon">'+baseOfferIcon(o)+'</div><span class="tag">'+escapeHtml(o.age_text||o.course_level||'Kurs')+'</span></div><h3>'+escapeHtml(o.name||'Kurs')+'</h3><p>'+escapeHtml(o.description||'')+'</p>'+price+availability+'<div class="offer-actions"><a href="#anfrage" class="dynamic-course-request" data-course-id="'+escapeHtml(o.id)+'" data-course-name="'+escapeHtml(o.name||'Kurs')+'">Kurs anfragen →</a></div>';
     cards.appendChild(article);
   });
+  cards.setAttribute('aria-busy', 'false');
 }
 
 function addDynamicCourseOptions(offers = []) {
