@@ -481,14 +481,25 @@ function renderBaseOffers(offers=[]){
     ).join('')+'</div>';
   }
 }
+function isCurrentCourseOffer(offer) {
+  if (!isCourseOffer(offer) || isBaseHomepageOffer(offer)) return false;
+  if (['abgesagt', 'beendet', 'archiviert'].includes(String(offer.status || '').toLowerCase())) return false;
+  const end = offer.social_payload?.course_end_date || offer.date;
+  return !end || end >= new Date().toLocaleDateString('sv-SE', {timeZone:'Europe/Berlin'});
+}
+
 function renderDynamicCourses(offers = []) {
-  // Nur zusätzlich angelegte, datierte Kursangebote; Grundangebote rendert renderBaseOffers().
+  // Grundangebote werden von renderBaseOffers gerendert.
   const cards=document.getElementById('offerCards'); if(!cards) return;
   cards.querySelectorAll('.dynamic-course-card').forEach(el=>el.remove());
-  offers.filter(isCourseOffer).filter(o=>!isBaseHomepageOffer(o)).filter(o=>!['abgesagt','beendet'].includes(String(o.status||'').toLowerCase())).forEach(o=>{
+  offers.filter(isCurrentCourseOffer).forEach(o=>{
     const article=document.createElement('article'); article.className='offer-card course-card dynamic-course-card dynamic-base-card';
     const price=o.price!=null&&o.price!==''?'<div class="offer-price"><strong>'+tpsEuro(o.price)+'</strong><span>'+(o.block_size?'pro Kind · '+escapeHtml(o.block_size)+' Termine':'pro Kind')+'</span></div>':'';
-    article.innerHTML='<div class="offer-top"><div class="offer-icon">'+baseOfferIcon(o)+'</div><span class="tag">'+escapeHtml(o.age_text||o.course_level||'Kurs')+'</span></div><h3>'+escapeHtml(o.name||'Kurs')+'</h3><p>'+escapeHtml(o.description||'')+'</p>'+price+'<div class="offer-actions"><a href="#anfrage" class="dynamic-course-request" data-course-id="'+escapeHtml(o.id)+'" data-course-name="'+escapeHtml(o.name||'Kurs')+'">Kurs anfragen →</a></div>';
+    const places = o.free_spots == null ? null : Number(o.free_spots);
+    const availability = places == null ? '' : '<p class="course-availability"><strong>' +
+      (places <= 0 ? 'Ausgebucht' : places + (places === 1 ? ' freier Platz' : ' freie Plätze')) +
+      '</strong></p>';
+    article.innerHTML='<div class="offer-top"><div class="offer-icon">'+baseOfferIcon(o)+'</div><span class="tag">'+escapeHtml(o.age_text||o.course_level||'Kurs')+'</span></div><h3>'+escapeHtml(o.name||'Kurs')+'</h3><p>'+escapeHtml(o.description||'')+'</p>'+price+availability+'<div class="offer-actions"><a href="#anfrage" class="dynamic-course-request" data-course-id="'+escapeHtml(o.id)+'" data-course-name="'+escapeHtml(o.name||'Kurs')+'">Kurs anfragen →</a></div>';
     cards.appendChild(article);
   });
 }
@@ -496,7 +507,7 @@ function renderDynamicCourses(offers = []) {
 function addDynamicCourseOptions(offers = []) {
   if (!offerSelect) return;
   offerSelect.querySelectorAll('optgroup[data-dynamic-courses="1"]').forEach(g => g.remove());
-  const current = offers.filter(isCourseOffer).filter(o => !['abgesagt','beendet'].includes(String(o.status || '').toLowerCase()));
+  const current = offers.filter(isCurrentCourseOffer);
   if (!current.length) return;
   const group = document.createElement('optgroup');
   group.label = 'Aktuelle Kurse';
@@ -658,7 +669,7 @@ function renderInsightVideos(offers = []) {
 
 window.addEventListener('tps-public-data-ready', (e) => {
   const offers = e.detail?.offers || [];
-  const courseOffers = offers.filter(isCourseOffer).filter(o=>!isBaseHomepageOffer(o));
+  const courseOffers = offers.filter(isCurrentCourseOffer);
   const live = offers.filter(o => !isCourseOffer(o) && !isBaseHomepageOffer(o) && !isInsightVideoOffer(o)).filter(o=>!['draft','archived'].includes(String(o.social_payload?.workshop_state||''))).map(publicOfferToWorkshop).filter(Boolean);
   renderBaseOffers(offers);
   renderInsightVideos(offers);
